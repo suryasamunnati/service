@@ -162,3 +162,66 @@ exports.getMyServices = async (req, res) => {
     });
   }
 };
+exports.searchServicesByKeyword = async (req, res) => {
+  try {
+    const { keyword } = req.query;
+
+    if (!keyword || keyword.trim() === '') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Keyword is required for service search'
+      });
+    }
+
+    // Check if user has valid subscription for service search
+    const userSubscriptions = await Subscription.find({
+      user: req.user._id,
+      endDate: { $gte: new Date() }
+    });
+
+    const canSearchServices = userSubscriptions.some(sub =>
+      ['SERVICE_SEARCH', 'SERVICE_POST'].includes(sub.type)
+    );
+
+    if (!canSearchServices) {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Please subscribe to search services',
+        subscriptionRequired: true
+      });
+    }
+
+    const keywordRegex = new RegExp(keyword, 'i'); // case-insensitive regex
+
+    // Find matching categories (type = Service)
+    const matchingCategories = await Category.find({
+      type: 'Service',
+      name: keywordRegex
+    }).select('_id');
+
+    const categoryIds = matchingCategories.map(cat => cat._id);
+
+    // Search for services that match category or location
+    const services = await Service.find({
+      $or: [
+        { category: { $in: categoryIds } },
+        { location: keywordRegex }
+      ]
+    })
+      .populate('category')
+      .populate('user', 'name email phone');
+
+    res.status(200).json({
+      status: 'success',
+      results: services.length,
+      data: {
+        services
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message
+    });
+  }
+};

@@ -47,3 +47,30 @@ exports.getAllCategories = async (req, res) => {
     });
   }
 };
+exports.getCategoriesByType = async (req, res) => {
+  try {
+    const { type } = req.params;
+
+    // Validate type
+    if (!['Service', 'Job'].includes(type)) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Type must be either "Service" or "Job"'
+      });
+    }
+
+    const categories = await Category.find({ type });
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        categories
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message
+    });
+  }
+};
