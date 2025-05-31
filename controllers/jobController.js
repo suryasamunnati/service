@@ -4,7 +4,7 @@ const Subscription = require('../models/Subscription');
 
 exports.createJob = async (req, res) => {
   try {
-    const { categoryId, images, location } = req.body;
+    const { categoryId, location } = req.body;
 
     // Verify category exists and is of type 'Job'
     const category = await Category.findById(categoryId);
@@ -17,7 +17,7 @@ exports.createJob = async (req, res) => {
 
     const job = await Job.create({
       category: categoryId,
-      images,
+      
       location,
       user: req.user._id // Assuming you have authentication middleware
     });

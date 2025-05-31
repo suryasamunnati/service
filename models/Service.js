@@ -6,18 +6,10 @@ const serviceSchema = new mongoose.Schema({
     ref: 'Category',
     required: [true, 'Category is required']
   },
-  images: [{
-    type: String,
-    required: [true, 'At least one image is required']
-  }],
   price: {
     amount: {
       type: Number,
       default: null
-    },
-    requestQuote: {
-      type: Boolean,
-      default: false
     }
   },
   location: {

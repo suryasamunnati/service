@@ -4,7 +4,7 @@ const Subscription = require('../models/Subscription');
 
 exports.createService = async (req, res) => {
   try {
-    const { categoryId, images, price, location } = req.body;
+    const { categoryId, price, location } = req.body;
 
     // Verify category exists and is of type 'Service'
     const category = await Category.findById(categoryId);
@@ -39,7 +39,6 @@ exports.createService = async (req, res) => {
 
     const service = await Service.create({
       category: categoryId,
-      images,
       price,
       location,
       user: req.user._id
