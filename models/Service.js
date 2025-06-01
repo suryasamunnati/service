@@ -11,10 +11,9 @@ const serviceSchema = new mongoose.Schema({
     trim: true
   }],
   price: {
-    amount: {
       type: Number,
       default: null
-    }
+    
   },
   location: {
     district: {
