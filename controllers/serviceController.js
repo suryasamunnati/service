@@ -4,7 +4,7 @@ const Subscription = require('../models/Subscription');
 
 exports.createService = async (req, res) => {
   try {
-    const { categoryId, price, location } = req.body;
+    const { categoryId, price, location, tags } = req.body;
 
     // Verify category exists and is of type 'Service'
     const category = await Category.findById(categoryId);
@@ -21,13 +21,9 @@ exports.createService = async (req, res) => {
       endDate: { $gte: new Date() }
     });
 
-    // Find if user has SERVICE_POST subscription
     const servicePostSub = userSubscriptions.find(sub => sub.type === 'SERVICE_POST');
-
-    // Count existing service posts by the user
     const existingServicePosts = await Service.countDocuments({ user: req.user._id });
 
-    // If user has no SERVICE_POST subscription and has already posted a service
     if (!servicePostSub && existingServicePosts >= 1) {
       return res.status(403).json({
         status: 'error',
@@ -41,6 +37,7 @@ exports.createService = async (req, res) => {
       category: categoryId,
       price,
       location,
+      tags: tags || [],
       user: req.user._id
     });
 
@@ -57,6 +54,7 @@ exports.createService = async (req, res) => {
     });
   }
 };
+
 
 exports.getAllServices = async (req, res) => {
   try {
@@ -199,17 +197,18 @@ exports.searchServicesByKeyword = async (req, res) => {
       name: keywordRegex
     }).select('_id');
 
-    const categoryIds = matchingCategories.map(cat => cat._id);
-
-    // Search for services that match category or location
+    // Search in services with category, tags, or location match
     const services = await Service.find({
       $or: [
-        { category: { $in: categoryIds } },
-        { location: keywordRegex }
+        { category: { $in: matchingCategories.map(cat => cat._id) } },
+        { tags: keywordRegex },
+        { 'location.district': keywordRegex },
+        { 'location.city': keywordRegex },
+        { 'location.state': keywordRegex }
       ]
     })
-      .populate('category')
-      .populate('user', 'name email phone');
+    .populate('category')
+    .populate('user', 'name email phone');
 
     res.status(200).json({
       status: 'success',
@@ -219,7 +218,7 @@ exports.searchServicesByKeyword = async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({
+    res.status(400).json({
       status: 'error',
       message: error.message
     });

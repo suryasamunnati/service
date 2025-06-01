@@ -6,6 +6,10 @@ const serviceSchema = new mongoose.Schema({
     ref: 'Category',
     required: [true, 'Category is required']
   },
+  tags: [{
+    type: String,
+    trim: true
+  }],
   price: {
     amount: {
       type: Number,
