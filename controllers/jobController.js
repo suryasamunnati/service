@@ -4,7 +4,7 @@ const Subscription = require('../models/Subscription');
 
 exports.createJob = async (req, res) => {
   try {
-    const { categoryId, location } = req.body;
+    const { categoryId, location, tags } = req.body;
 
     // Verify category exists and is of type 'Job'
     const category = await Category.findById(categoryId);
@@ -17,7 +17,7 @@ exports.createJob = async (req, res) => {
 
     const job = await Job.create({
       category: categoryId,
-      
+      tags: tags || [],
       location,
       user: req.user._id // Assuming you have authentication middleware
     });
@@ -179,13 +179,17 @@ exports.searchJobsByKeyword = async (req, res) => {
 
     const categoryIds = matchingCategories.map(cat => cat._id);
 
+    
     // Then search jobs that either match:
     // - The category name (already filtered by ID)
     // - OR location fields (partial match)
     const jobs = await Job.find({
       $or: [
         { category: { $in: categoryIds } },
-        { location: keywordRegex }
+        { 'location.district': keywordRegex },
+        { 'location.city': keywordRegex },
+        { 'location.state': keywordRegex },
+        { tags: keywordRegex },
       ]
     })
       .populate('category')

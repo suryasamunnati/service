@@ -11,6 +11,7 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const viewRoutes = require('./routes/viewRoutes');
 const subscriptionRoutes = require('./routes/subscriptionRoutes');
 const governmentJobRoutes = require('./routes/governmentJobRoutes');
+const usageRoutes = require('./routes/usageRoutes');
 const app = express();
 
 // Middleware
@@ -35,6 +36,7 @@ app.use('/api/jobs', jobRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/government-jobs', governmentJobRoutes);
+app.use('/api/usage', usageRoutes);
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))

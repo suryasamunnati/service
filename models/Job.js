@@ -28,6 +28,10 @@ const jobSchema = new mongoose.Schema({
       required: [true, 'Country is required']
     }
   },
+  tags: [{
+    type: String,
+    trim: true
+  }],
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
