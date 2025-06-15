@@ -4,21 +4,34 @@ const Subscription = require('../models/Subscription');
 
 exports.createJob = async (req, res) => {
   try {
-    const { categoryId, location, tags } = req.body;
+    const { categoriesIds, location, isCompanyPost, companyId } = req.body;
 
-    // Verify category exists and is of type 'Job'
-    const category = await Category.findById(categoryId);
-    if (!category || category.type !== 'Job') {
+    // Verify categories exist and are of type 'Job'
+    if (!categoriesIds || !Array.isArray(categoriesIds) || categoriesIds.length === 0) {
       return res.status(400).json({
         status: 'error',
-        message: 'Invalid category or category type'
+        message: 'At least one category is required'
+      });
+    }
+
+    // Verify all categories exist and are of type 'Job'
+    const categories = await Category.find({
+      _id: { $in: categoriesIds },
+      type: 'Job'
+    });
+
+    if (categories.length !== categoriesIds.length) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'One or more categories are invalid or not of type Job'
       });
     }
 
     const job = await Job.create({
-      category: categoryId,
-      tags: tags || [],
+      categories: categoriesIds,
       location,
+      isCompanyPost: isCompanyPost || false,
+      companyId: companyId || null,
       user: req.user._id // Assuming you have authentication middleware
     });
 

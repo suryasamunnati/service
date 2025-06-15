@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 
 const jobSchema = new mongoose.Schema({
-  category: {
+  categories: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Category',
-    required: [true, 'Category is required']
-  },
+    required: [true, 'At least one category is required']
+  }],
   location: {
     district: {
       type: String,
@@ -28,10 +28,15 @@ const jobSchema = new mongoose.Schema({
       required: [true, 'Country is required']
     }
   },
-  tags: [{
-    type: String,
-    trim: true
-  }],
+  isCompanyPost: {
+    type: Boolean,
+    default: false
+  },
+  companyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Company',
+    default: null
+  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

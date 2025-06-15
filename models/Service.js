@@ -1,14 +1,10 @@
 const mongoose = require('mongoose');
 
 const serviceSchema = new mongoose.Schema({
-  category: {
+  categories: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Category',
-    required: [true, 'Category is required']
-  },
-  tags: [{
-    type: String,
-    trim: true
+    required: [true, 'At least one category is required']
   }],
   price: {
       type: Number,
@@ -36,6 +32,15 @@ const serviceSchema = new mongoose.Schema({
       type: String,
       required: [true, 'Country is required']
     }
+  },
+  isCompanyPost: {
+    type: Boolean,
+    default: false
+  },
+  companyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Company',
+    default: null
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,

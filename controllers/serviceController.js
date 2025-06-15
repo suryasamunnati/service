@@ -4,14 +4,26 @@ const Subscription = require('../models/Subscription');
 
 exports.createService = async (req, res) => {
   try {
-    const { categoryId, price, location, tags } = req.body;
+    const { categoriesIds, price, location, isCompanyPost, companyId } = req.body;
 
-    // Verify category exists and is of type 'Service'
-    const category = await Category.findById(categoryId);
-    if (!category || category.type !== 'Service') {
+    // Verify categories exist and are of type 'Service'
+    if (!categoriesIds || !Array.isArray(categoriesIds) || categoriesIds.length === 0) {
       return res.status(400).json({
         status: 'error',
-        message: 'Invalid category or category type'
+        message: 'At least one category is required'
+      });
+    }
+
+    // Verify all categories exist and are of type 'Service'
+    const categories = await Category.find({
+      _id: { $in: categoriesIds },
+      type: 'Service'
+    });
+
+    if (categories.length !== categoriesIds.length) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'One or more categories are invalid or not of type Service'
       });
     }
 
@@ -34,10 +46,11 @@ exports.createService = async (req, res) => {
     }
 
     const service = await Service.create({
-      category: categoryId,
+      categories: categoriesIds,
       price,
       location,
-      tags: tags || [],
+      isCompanyPost: isCompanyPost || false,
+      companyId: companyId || null,
       user: req.user._id
     });
 
