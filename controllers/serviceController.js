@@ -4,7 +4,7 @@ const Subscription = require('../models/Subscription');
 
 exports.createService = async (req, res) => {
   try {
-    const { categoriesIds, price, location, isCompanyPost, companyId } = req.body;
+    const { categoriesIds, categoryPrices, location, isCompanyPost, companyId } = req.body;
 
     // Verify categories exist and are of type 'Service'
     if (!categoriesIds || !Array.isArray(categoriesIds) || categoriesIds.length === 0) {
@@ -27,6 +27,26 @@ exports.createService = async (req, res) => {
       });
     }
 
+    // Validate categoryPrices
+    if (!categoryPrices || !Array.isArray(categoryPrices) || categoryPrices.length === 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Category prices are required'
+      });
+    }
+
+    // Ensure all categories have a price and all prices have a valid category
+    const categoryPriceMap = new Map(categoryPrices.map(item => [item.category.toString(), item]));
+    
+    for (const categoryId of categoriesIds) {
+      if (!categoryPriceMap.has(categoryId.toString())) {
+        return res.status(400).json({
+          status: 'error',
+          message: `Price for category ${categoryId} is missing`
+        });
+      }
+    }
+
     // Check user's subscription status and free post usage
     const userSubscriptions = await Subscription.find({
       user: req.user._id,
@@ -47,10 +67,10 @@ exports.createService = async (req, res) => {
 
     const service = await Service.create({
       categories: categoriesIds,
-      price,
+      categoryPrices,
       location,
-      isCompanyPost: isCompanyPost || false,
-      companyId: companyId || null,
+      isCompanyPost,
+      companyId,
       user: req.user._id
     });
 

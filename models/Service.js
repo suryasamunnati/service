@@ -6,11 +6,17 @@ const serviceSchema = new mongoose.Schema({
     ref: 'Category',
     required: [true, 'At least one category is required']
   }],
-  price: {
+  categoryPrices: [{
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category',
+      required: [true, 'Category is required']
+    },
+    price: {
       type: Number,
-      default: null
-    
-  },
+      required: [true, 'Price is required']
+    }
+  }],
   location: {
     district: {
       type: String,
@@ -51,5 +57,4 @@ const serviceSchema = new mongoose.Schema({
   timestamps: true
 });
 
-const Service = mongoose.model('Service', serviceSchema);
-module.exports = Service;
+module.exports = mongoose.model('Service', serviceSchema);
