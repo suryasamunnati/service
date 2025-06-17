@@ -175,26 +175,7 @@ exports.getServiceById = async (req, res) => {
   }
 };
 
-exports.getMyServices = async (req, res) => {
-  try {
-    const services = await Service.find({ user: req.user._id })
-      .populate('category')
-      .populate('user', 'name email phone');
 
-    res.status(200).json({
-      status: 'success',
-      results: services.length,
-      data: {
-        services
-      }
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: 'error',
-      message: error.message
-    });
-  }
-};
 exports.searchServicesByKeyword = async (req, res) => {
   try {
     const { keyword } = req.query;
