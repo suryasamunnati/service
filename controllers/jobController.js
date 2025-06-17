@@ -89,7 +89,7 @@ exports.getAllJobs = async (req, res) => {
     }
 
     const jobs = await Job.find()
-      .populate('category')
+      .populate('categories')
       .populate('user', 'name email phone');
 
     res.status(200).json({
