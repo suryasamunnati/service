@@ -48,7 +48,26 @@ exports.createJob = async (req, res) => {
     });
   }
 };
+exports.getMyJobs = async (req, res) => {
+  try {
+    const jobs = await Job.find({ user: req.user._id })
+      .populate('category')
+      .populate('user', 'name email phone');
 
+    res.status(200).json({
+      status: 'success',
+      results: jobs.length,
+      data: {
+        jobs
+      }
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: 'error',
+      message: error.message
+    });
+  }
+};
 exports.getAllJobs = async (req, res) => {
   try {
     // Check if user has valid subscription for job search
