@@ -51,7 +51,7 @@ exports.createJob = async (req, res) => {
 exports.getMyJobs = async (req, res) => {
   try {
     const jobs = await Job.find({ user: req.user._id })
-      .populate('category')
+      .populate('categories')
       .populate('user', 'name email phone');
 
     res.status(200).json({
@@ -128,8 +128,10 @@ exports.getJobById = async (req, res) => {
     }
 
     const job = await Job.findById(req.params.id)
-      .populate('category')
-      .populate('user', 'name email phone');
+      .populate('categories')  // Change to .populate('categories')
+
+    // In searchJobsByKeyword function (around line 208)
+    .populate('categories')  // Change to .populate('categories')
 
     if (!job) {
       return res.status(404).json({
@@ -205,7 +207,7 @@ exports.searchJobsByKeyword = async (req, res) => {
         { tags: keywordRegex },
       ]
     })
-      .populate('category')
+      .populate('categories')  // Change to .populate('categories')
       .populate('user', 'name email phone');
 
     res.status(200).json({
