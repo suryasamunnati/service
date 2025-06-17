@@ -4,15 +4,18 @@ const Subscription = require('../models/Subscription');
 
 exports.createService = async (req, res) => {
   try {
-    const { categoriesIds, categoryPrices, location, isCompanyPost, companyId } = req.body;
+    const { categoryPrices, location, isCompanyPost, companyId } = req.body;
 
-    // Verify categories exist and are of type 'Service'
-    if (!categoriesIds || !Array.isArray(categoriesIds) || categoriesIds.length === 0) {
+    // Verify categoryPrices exist and are properly formatted
+    if (!categoryPrices || !Array.isArray(categoryPrices) || categoryPrices.length === 0) {
       return res.status(400).json({
         status: 'error',
-        message: 'At least one category is required'
+        message: 'At least one category with price is required'
       });
     }
+
+    // Extract category IDs from categoryPrices
+    const categoriesIds = categoryPrices.map(item => item.category);
 
     // Verify all categories exist and are of type 'Service'
     const categories = await Category.find({
@@ -25,26 +28,6 @@ exports.createService = async (req, res) => {
         status: 'error',
         message: 'One or more categories are invalid or not of type Service'
       });
-    }
-
-    // Validate categoryPrices
-    if (!categoryPrices || !Array.isArray(categoryPrices) || categoryPrices.length === 0) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Category prices are required'
-      });
-    }
-
-    // Ensure all categories have a price and all prices have a valid category
-    const categoryPriceMap = new Map(categoryPrices.map(item => [item.category.toString(), item]));
-    
-    for (const categoryId of categoriesIds) {
-      if (!categoryPriceMap.has(categoryId.toString())) {
-        return res.status(400).json({
-          status: 'error',
-          message: `Price for category ${categoryId} is missing`
-        });
-      }
     }
 
     // Check user's subscription status and free post usage
