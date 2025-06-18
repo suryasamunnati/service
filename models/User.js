@@ -29,6 +29,10 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  skippedCompanyInfo: {
+    type: Boolean,
+    default: false
+  },
   referralId: {
     type: String,
     unique: true
