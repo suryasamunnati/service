@@ -184,30 +184,19 @@ exports.searchJobsByKeyword = async (req, res) => {
       });
     }
 
-    const keywordRegex = new RegExp(keyword, 'i'); // case-insensitive search
-
-    // First, find matching categories (like 'plumber')
+    // Find matching categories (like 'plumber')
     const matchingCategories = await Category.find({
       type: 'Job',
-      name: keywordRegex
+      name: new RegExp(keyword, 'i')
     }).select('_id');
 
     const categoryIds = matchingCategories.map(cat => cat._id);
 
-    
-    // Then search jobs that either match:
-    // - The category name (already filtered by ID)
-    // - OR location fields (partial match)
+    // Only search jobs that match the category
     const jobs = await Job.find({
-      $or: [
-        { category: { $in: categoryIds } },
-        { 'location.district': keywordRegex },
-        { 'location.city': keywordRegex },
-        { 'location.state': keywordRegex },
-        { tags: keywordRegex },
-      ]
+      categories: { $in: categoryIds }
     })
-      .populate('categories')  // Change to .populate('categories')
+      .populate('categories')
       .populate('user', 'name email phone');
 
     res.status(200).json({

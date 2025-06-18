@@ -73,7 +73,7 @@ exports.createService = async (req, res) => {
 exports.getMyServices = async (req, res) => {
   try {
     const services = await Service.find({ user: req.user._id })
-      .populate('categories.category')
+      .populate('categoryPrices.category')
       .populate('user', 'name email phone');
 
     res.status(200).json({
@@ -112,7 +112,7 @@ exports.getAllServices = async (req, res) => {
     }
 
     const services = await Service.find()
-      .populate('category')
+      .populate('categoryPrices.category')
       .populate('user', 'name email phone');
 
     res.status(200).json({
@@ -151,7 +151,7 @@ exports.getServiceById = async (req, res) => {
     }
 
     const service = await Service.findById(req.params.id)
-      .populate('category')
+      .populate('categoryPrices.category')
       .populate('user', 'name email phone');
 
     if (!service) {
@@ -205,25 +205,17 @@ exports.searchServicesByKeyword = async (req, res) => {
       });
     }
 
-    const keywordRegex = new RegExp(keyword, 'i'); // case-insensitive regex
-
     // Find matching categories (type = Service)
     const matchingCategories = await Category.find({
       type: 'Service',
-      name: keywordRegex
+      name: new RegExp(keyword, 'i')
     }).select('_id');
 
-    // Search in services with category, tags, or location match
+    // Only search services that match the category
     const services = await Service.find({
-      $or: [
-        { category: { $in: matchingCategories.map(cat => cat._id) } },
-        { tags: keywordRegex },
-        { 'location.district': keywordRegex },
-        { 'location.city': keywordRegex },
-        { 'location.state': keywordRegex }
-      ]
+      'categoryPrices.category': { $in: matchingCategories.map(cat => cat._id) }
     })
-    .populate('category')
+    .populate('categoryPrices.category')
     .populate('user', 'name email phone');
 
     res.status(200).json({
